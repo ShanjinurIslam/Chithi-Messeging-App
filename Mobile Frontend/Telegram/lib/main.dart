@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.white, // navigation bar color
     ));
+
     return MaterialApp(
       builder: (context, child) {
         return ScrollConfiguration(
