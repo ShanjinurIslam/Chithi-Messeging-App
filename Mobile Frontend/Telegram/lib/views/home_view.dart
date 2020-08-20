@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:Telegram/supporting_views/conversation_item.dart';
 import 'package:Telegram/utils/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomeView extends StatefulWidget {
   @override
@@ -14,11 +18,39 @@ class _HomeState extends State<HomeView> {
     'Pinned',
     'Read',
     'Unread',
-    'Muted',
   ];
 
-  int current = 0;
-  int unread = 100;
+  List<String> names = [
+    "John",
+    "Elita",
+    "Max",
+    "Frank",
+    "Ronaldo",
+    "Liam",
+    "Emma",
+    "Noah",
+    "Olivia",
+    "William",
+    "Ava",
+    "James",
+    "Isabella"
+        "Oliver",
+    "Sophia",
+    "Benjamin",
+    "Charlotte"
+        "Elijah",
+    "Mia",
+    "Lucas",
+    "Amelia",
+    "Mason",
+    "Harper"
+        "Logan",
+    "Evelyn"
+  ];
+
+  bool isScrolling = false;
+
+  String current = "All";
 
   @override
   void initState() {
@@ -80,130 +112,217 @@ class _HomeState extends State<HomeView> {
                   ),
                 ), // Header section ends here
 
-                new Container(
+                Container(
+                  //key: UniqueKey(),
                   margin: EdgeInsets.fromLTRB(0, 20, 0, 20),
                   height: 40 * (_height / 896.0),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: index == 0
-                            ? EdgeInsets.fromLTRB(20 * (414 / _width), 0, 0, 0)
-                            : EdgeInsets.fromLTRB(0, 0, 0, 0),
-                        child: FlatButton(
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20))),
-                          color: current == index ? customBlue : null,
-                          onPressed: () {
-                            setState(() {
-                              this.current = index;
-                            });
-                          },
-                          child: Text(
-                            categories[index],
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: current == index
-                                    ? Colors.white
-                                    : Colors.black),
-                          ),
-                        ),
-                      );
-                    },
-                    itemCount: categories.length,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: categories
+                        .map((e) => InkWell(
+                              borderRadius: BorderRadius.circular(26.0),
+                              onTap: () {
+                                setState(() {
+                                  current = e;
+                                });
+                              },
+                              child: AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 300),
+                                  switchInCurve: Curves.easeIn,
+                                  switchOutCurve: Curves.easeOut,
+                                  child: current == e
+                                      ? Container(
+                                          margin:
+                                              EdgeInsets.fromLTRB(5, 0, 5, 0),
+                                          width: 80,
+                                          height: 44,
+                                          key: UniqueKey(),
+                                          decoration: BoxDecoration(
+                                            color: customBlue,
+                                            borderRadius:
+                                                new BorderRadius.circular(26.0),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              e,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 15,
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        )
+                                      : Container(
+                                          margin:
+                                              EdgeInsets.fromLTRB(5, 0, 5, 0),
+                                          width: 80,
+                                          height: 50,
+                                          key: UniqueKey(),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                new BorderRadius.circular(26.0),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              e,
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                        )),
+                            ))
+                        .toList(),
                   ),
+                  /*
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (BuildContext context, int index) {
+                              return InkWell(
+                                borderRadius: BorderRadius.circular(26.0),
+                                onTap: () {
+                                  setState(() {
+                                    current = index;
+                                  });
+                                },
+                                child: AnimatedSwitcher(
+                                    duration: Duration(milliseconds: 300),
+                                    switchInCurve: Curves.easeIn,
+                                    switchOutCurve: Curves.easeOut,
+                                    child: current == index
+                                        ? Container(
+                                            margin: index == 0
+                                                ? EdgeInsets.fromLTRB(
+                                                    27 * (414 / _width),
+                                                    0,
+                                                    5,
+                                                    0)
+                                                : EdgeInsets.fromLTRB(
+                                                    5, 0, 5, 0),
+                                            width: 80,
+                                            height: 45,
+                                            key: UniqueKey(),
+                                            decoration: BoxDecoration(
+                                              color: customBlue,
+                                              borderRadius:
+                                                  new BorderRadius.circular(
+                                                      26.0),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                categories[index],
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 15,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          )
+                                        : Container(
+                                            margin: index == 0
+                                                ? EdgeInsets.fromLTRB(
+                                                    27 * (414 / _width),
+                                                    0,
+                                                    5,
+                                                    0)
+                                                : EdgeInsets.fromLTRB(
+                                                    5, 0, 5, 0),
+                                            width: 80,
+                                            height: 50,
+                                            key: UniqueKey(),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  new BorderRadius.circular(
+                                                      26.0),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                categories[index],
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.black),
+                                              ),
+                                            ),
+                                          )),
+                              );
+                            },
+                            itemCount: categories.length,
+                          ),*/
                 ),
+
                 Expanded(
-                  child: ListView(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.all(20 * (414 / _width)),
-                        height: 82 * (_height / 896.0),
-                        child: Row(
-                          children: [
-                            Stack(
-                              alignment: Alignment.bottomRight,
-                              children: [
-                                CircleAvatar(
-                                  child: Image.asset('images/profile.png'),
-                                  radius: 41,
-                                ),
-                                Container(
-                                  //color: Colors.white,
-                                  height: 23,
-                                  width: 23,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.green,
-                                    border: new Border.all(
-                                        color: Colors.white,
-                                        width: 5,
-                                        style: BorderStyle.solid),
-                                  ),
-                                )
-                              ],
-                            ),
-                            Spacer(
-                              flex: 1,
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Lisa Summer",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 23),
-                                ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  "Why did you do that?",
-                                  style: TextStyle(
-                                      color: customBlue,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 17),
-                                )
-                              ],
-                            ),
-                            Spacer(
-                              flex: 4,
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  "03:35PM",
-                                  style: TextStyle(color: customGray),
-                                ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Container(
-                                  child: Center(
-                                    child: Text(
-                                      unread.toString(),
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                  width: unread > 10 ? 44 : 26,
-                                  height: 26,
-                                  decoration: new BoxDecoration(
-                                    color: customBlue,
-                                    borderRadius:
-                                        new BorderRadius.circular(26.0),
-                                  ),
-                                )
-                              ],
+                  child: NotificationListener<ScrollUpdateNotification>(
+                    child: ListView.builder(
+                      itemCount: names.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Slidable(
+                          key: Key(UniqueKey().toString()),
+                          dismissal: SlidableDismissal(
+                            child: SlidableDrawerDismissal(),
+                            onDismissed: (actionType) {
+                              setState(() {
+                                names.removeAt(index);
+                              });
+                            },
+                            dismissThresholds: <SlideActionType, double>{
+                              SlideActionType.primary: 1.0
+                            },
+                          ),
+                          actionPane: SlidableDrawerActionPane(),
+                          actionExtentRatio: 0.25,
+                          actions: <Widget>[
+                            IconSlideAction(
+                              caption: 'Archive',
+                              color: Colors.blue,
+                              icon: Icons.archive,
+                              onTap: () => {},
                             ),
                           ],
-                        ),
-                      ),
-                    ],
+                          secondaryActions: <Widget>[
+                            IconSlideAction(
+                              caption: 'More',
+                              color: Colors.black45,
+                              icon: Icons.more_horiz,
+                              onTap: () {},
+                            ),
+                            IconSlideAction(
+                              caption: 'Delete',
+                              color: Colors.red,
+                              icon: Icons.delete,
+                              onTap: () {
+                                //names.removeAt(index);
+                              },
+                            ),
+                          ],
+                          child: FlatButton(
+                            onPressed: () => {},
+                            child: ConversationItem(
+                              name: names[index],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    onNotification: (notification) {
+                      /*
+                      if (notification.metrics.pixels >
+                              notification.metrics.minScrollExtent &&
+                          isScrolling == false) {
+                        isScrolling = true;
+                        setState(() {});
+                      }
+
+                      if (notification.metrics.pixels ==
+                              notification.metrics.minScrollExtent &&
+                          isScrolling == true) {
+                        isScrolling = false;
+                        setState(() {});
+                      }*/
+
+                      return true;
+                    },
                   ),
                 ),
               ],
