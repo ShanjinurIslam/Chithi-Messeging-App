@@ -1,9 +1,6 @@
 const express = require("express")
 const path = require("path")
 
-// setting up public folder
-const publicPath = path.join(__dirname, '../public')
-
 //initialized app
 var app = express()
 
