@@ -208,7 +208,7 @@ class _HomeState extends State<HomeView> {
                           secondaryActions: <Widget>[
                             IconSlideAction(
                               caption:
-                                  this.items[index].read ? 'Read' : 'Unread',
+                                  this.items[index].read ? 'Unread' : 'read',
                               color: Colors.black45,
                               icon: Icons.markunread,
                               onTap: () {
