@@ -19,14 +19,14 @@ function Index(props) {
                             <div className="card-text text-start">
                                 <Form>
                                     <FormGroup>
-                                        <input type="email" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Email"/>
+                                        <input type="email" className="form-control" aria-describedby="emailHelp" placeholder="Email"/>
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <input type="password" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Password"/>
+                                        <input type="password" className="form-control" aria-describedby="emailHelp" placeholder="Password"/>
                                    </FormGroup>
                                         <div className="text-center">
-                                            <Button type="submit" className="btn btn-primary btn-block"><b>Log In</b></Button>
+                                            <Button id="logInButton" className="btn btn-primary btn-block"><b>Log In</b></Button>
                                             <br/>
                                             <a className="text-primary" href="#" style={{ fontSize:15}}><b>Forgotten account?</b></a>
                                         </div>

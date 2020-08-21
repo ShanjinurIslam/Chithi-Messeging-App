@@ -2,6 +2,8 @@ const express = require("express")
 const http = require("http")
 const path = require("path")
 const socketio = require("socket.io")
+const { v4: uuidv4 } = require('uuid');
+
 
 //initialized app
 var app = express()
@@ -20,8 +22,13 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jsx');
 app.engine('jsx', require('express-react-views').createEngine());
 
-io.on('connection',()=>{
+io.on('connection',(socket)=>{
     console.log("New websocket connect")
+    socket.emit("welcome","Welcome to the Telegram")
+
+    socket.on('greet',(message)=>{
+        io.emit('new_member',(uuidv4()+": Says Hi!"))
+    })
 })
 
 app.get('/',(req,res)=>{
