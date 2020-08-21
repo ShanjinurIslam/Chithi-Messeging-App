@@ -22,17 +22,28 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jsx');
 app.engine('jsx', require('express-react-views').createEngine());
 
+currentChatSession = ""
+
 io.on('connection',(socket)=>{
     console.log("New websocket connect")
-    socket.emit("welcome","Welcome to the Telegram")
+    socket.emit("welcome",currentChatSession)
+    socket.broadcast.emit('message','A new user has joined')
+    socket.on('sendMessage',(username,message)=>{
+        currentChatSession += "<b>"+username+"</b> : "+ message +"<br/>"
+        io.emit("broadcast",currentChatSession)
+    })
 
-    socket.on('greet',(message)=>{
-        io.emit('new_member',(uuidv4()+": Says Hi!"))
+    socket.on('disconnect',()=>{
+        io.emit('message','user has left')
     })
 })
 
 app.get('/',(req,res)=>{
-    res.render('index', { name: 'John' });
+    res.render('index');
+})
+
+app.get('/test',(req,res)=>{
+    res.render('broadcast',{ title: 'Broadcast Test' })
 })
 
 server.listen(3000,()=>{
