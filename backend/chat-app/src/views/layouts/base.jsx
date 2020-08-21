@@ -23,6 +23,8 @@ class BaseLayout extends React.Component {
                     {this.props.children}
                     
                 </body>
+                <script src="/socket.io/socket.io.js"></script>
+                <script src="/static/js/chat.js"></script>
             </html>
         );
     };
