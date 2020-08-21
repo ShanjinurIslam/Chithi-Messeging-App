@@ -2,10 +2,18 @@ import 'package:Telegram/utils/colors.dart';
 import 'package:flutter/material.dart';
 
 class ConversationItem extends StatelessWidget {
-  int unread = 5;
-  final String name;
+  final String userName;
+  final String lastMessage;
+  final String lastMessageTime;
+  final int unseen;
+  final String profileImageLink;
 
-  ConversationItem({this.name});
+  ConversationItem(
+      {this.userName,
+      this.lastMessage,
+      this.lastMessageTime,
+      this.unseen,
+      this.profileImageLink});
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +23,14 @@ class ConversationItem extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 10 * (_height / 896.0)),
       height: 82,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Stack(
             alignment: Alignment.bottomRight,
             children: [
               CircleAvatar(
-                child: Image.asset('images/profile.png'),
+                backgroundImage: NetworkImage(this.profileImageLink),
+                backgroundColor: Colors.transparent,
                 radius: 41,
               ),
               Container(
@@ -44,14 +54,17 @@ class ConversationItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                this.name,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 23),
+                this
+                    .userName
+                    .trim()
+                    .substring(0, userName.length > 15 ? 15 : userName.length),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
               SizedBox(
                 height: 5,
               ),
               Text(
-                "Why did you do that?",
+                lastMessage.substring(0, 20),
                 style: TextStyle(
                     color: customBlue,
                     fontWeight: FontWeight.normal,
@@ -67,7 +80,7 @@ class ConversationItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "03:35PM",
+                lastMessageTime,
                 style: TextStyle(color: customGray),
               ),
               SizedBox(
@@ -76,11 +89,11 @@ class ConversationItem extends StatelessWidget {
               Container(
                 child: Center(
                   child: Text(
-                    unread.toString(),
+                    unseen.toString(),
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
-                width: unread > 10 ? 44 : 26,
+                width: unseen > 10 ? 44 : 26,
                 height: 26,
                 decoration: new BoxDecoration(
                   color: customBlue,
