@@ -1,0 +1,11 @@
+.message_container {
+    justify-content: space-between;
+    flex-direction: column;
+    height: 100vh;
+    display: flex;
+}
+
+.message_container .btn-holder {
+    justify-content: flex-end;
+    display: flex;
+}

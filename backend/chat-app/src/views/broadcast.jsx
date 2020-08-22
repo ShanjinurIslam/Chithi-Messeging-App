@@ -25,7 +25,7 @@ class Broadcast extends React.Component {
 
     render() {
         return (
-            <BaseLayout title={this.props.title}>
+            <BaseLayout title={this.props.title} script="/static/js/broadcast.js">
                 <Container className="text-start" style={{ paddingTop: "5%" }}>
                     <h2>Welcome to User Broadcast Service</h2>
                     <br />

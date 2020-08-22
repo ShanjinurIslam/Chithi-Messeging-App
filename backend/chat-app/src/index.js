@@ -3,76 +3,76 @@ const http = require("http")
 const path = require("path")
 const socketio = require("socket.io")
 const bodyParser = require('body-parser')
+
 const { v4: uuidv4 } = require('uuid');
 const { time } = require("console");
 const { title } = require("process")
-var Filter = require('bad-words'),
 
+var cookieSession = require('cookie-session')
+
+var Filter = require('bad-words')
 filter = new Filter();
 
 //initialized app
 var app = express()
 
-const publicPath = path.join(__dirname, '/public')
-console.log(publicPath)
-
-app.use(bodyParser.urlencoded({ extended: true }))
 
 //initialize server 
 const server = http.createServer(app)
-const io = socketio(server)
 
+const publicPath = path.join(__dirname, '/public')
+
+app.use(cookieSession({
+    name: 'session',
+    keys: ['key1','key2'],
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours,
+    path:'/',
+    httpOnly:true
+  }))
+
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/static',express.static(publicPath))
-
-
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jsx');
 app.engine('jsx', require('express-react-views').createEngine());
 
-/*
-
-currentChatSession = ""
-
-io.on('connection',(socket)=>{
-    console.log("New websocket connect")
-
-    socket.emit("welcome",currentChatSession)
-    
-    socket.broadcast.emit('message','A new user has joined')
-
-    socket.on('sendMessage',(username,message,callback)=>{
-        if(filter.isProfane(message)){
-            callback("Profane is not allowed")
-        }
-        else{
-            currentChatSession += "<b>"+username+"</b> : "+ filter.clean(message) +"<br/>"
-            io.emit("broadcast",currentChatSession)
-            callback('Delivered at '+new Date().toLocaleTimeString())
-        }
-    })
-
-    socket.on('disconnect',()=>{
-        io.emit('message','user has left')
-    })
-})
-
-*/
+const broadcast_io = require('./socket_broadcast')
+broadcast_io(server)
 
 app.get('/',(req,res)=>{
     res.render('index');
 })
 
-app.post('/join_room',(req,res)=>{
-    console.log(req.body)
-    res.render('room_login',title=req.body['room']);
-})
-
 app.get('/join_room',(req,res)=>{
+    if(req.session.username){
+        return res.redirect('/room')
+    }
     res.render('room_login');
 })
 
+app.post('/join_room',(req,res)=>{
+    const username = req.body.username
+    const room = req.body.room
+
+    if(username=="" || room == ""){
+        return res.render('room_login',{error:'username/room name missing'})
+    }
+    req.session.username = username
+    req.session.room = room
+    res.redirect('/room')
+})
+
 app.get('/room',(req,res)=>{
-    res.render('room')
+    if(!req.session.username){
+        return res.redirect('/join_room')
+    }
+    res.render('room',{title:req.session.room+' Room',activeList:['Frank','Abby','Joel','Elly']})
+})
+
+app.post('/logout',(req,res)=>{
+    req.session = null
+    res.redirect('/join_room')
 })
 
 app.get('/test',(req,res)=>{
