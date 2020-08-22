@@ -17,7 +17,7 @@ function Index(props) {
                     <Card className="text-start shadow p-3 mb-5 bg-white rounded" style={{width:"100%"}}>
                         <div className="card-body">
                             <div className="card-text text-start">
-                                <Form>
+                                <Form action="/" method="POST">
                                     <FormGroup>
                                         <input type="email" className="form-control" aria-describedby="emailHelp" placeholder="Email"/>
                                     </FormGroup>
@@ -26,7 +26,7 @@ function Index(props) {
                                         <input type="password" className="form-control" aria-describedby="emailHelp" placeholder="Password"/>
                                    </FormGroup>
                                         <div className="text-center">
-                                            <Button id="logInButton" className="btn btn-primary btn-block"><b>Log In</b></Button>
+                                            <Button id="logInButton" className="btn btn-primary btn-block" type="submit"><b>Log In</b></Button>
                                             <br/>
                                             <a className="text-primary" href="#" style={{ fontSize:15}}><b>Forgotten account?</b></a>
                                         </div>

@@ -3,7 +3,14 @@ const http = require("http")
 const path = require("path")
 const socketio = require("socket.io")
 const { v4: uuidv4 } = require('uuid');
+const { time } = require("console");
+var Filter = require('bad-words'),
 
+filter = new Filter();
+
+function generateMessage(){
+    
+}
 
 //initialized app
 var app = express()
@@ -26,11 +33,20 @@ currentChatSession = ""
 
 io.on('connection',(socket)=>{
     console.log("New websocket connect")
+
     socket.emit("welcome",currentChatSession)
+    
     socket.broadcast.emit('message','A new user has joined')
-    socket.on('sendMessage',(username,message)=>{
-        currentChatSession += "<b>"+username+"</b> : "+ message +"<br/>"
-        io.emit("broadcast",currentChatSession)
+
+    socket.on('sendMessage',(username,message,callback)=>{
+        if(filter.isProfane(message)){
+            callback("Profane is not allowed")
+        }
+        else{
+            currentChatSession += "<b>"+username+"</b> : "+ filter.clean(message) +"<br/>"
+            io.emit("broadcast",currentChatSession)
+            callback('Delivered at '+new Date().toLocaleTimeString())
+        }
     })
 
     socket.on('disconnect',()=>{

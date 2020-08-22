@@ -1,7 +1,6 @@
 const socket = io()
 
 const serverActive = document.getElementById("serverActive")
-
 const notificationBlock = document.getElementById("notifications")
 
 socket.on('welcome',(message)=>{
@@ -16,6 +15,8 @@ socket.on('message',(message)=>{
 const username = document.getElementById("username")
 const message = document.getElementById("message")
 const sendButton = document.getElementById("sendButton")
+const sendLocationButton = document.getElementById("sendLocationButton")
+
 const broadcast_messages = document.getElementById("broadcast_message")
 
 socket.on('broadcast',(message)=>{
@@ -23,7 +24,9 @@ socket.on('broadcast',(message)=>{
 })
 
 
-sendButton.addEventListener('click',()=>{
+sendButton.addEventListener('click',(e)=>{
+    e.preventDefault()
+
     const u = username.value
     const m =  message.value
 
@@ -33,6 +36,8 @@ sendButton.addEventListener('click',()=>{
     else{
         message.value = ""
         username.readOnly = true
-        socket.emit('sendMessage',u,m)
+        socket.emit('sendMessage',u,m,(message)=>{
+            console.log("Delivery Message: ",message)
+        })
     }
 })
