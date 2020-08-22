@@ -1,3 +1,4 @@
+/*
 const socket = io()
 
 const serverActive = document.getElementById("serverActive")
@@ -41,3 +42,4 @@ sendButton.addEventListener('click',(e)=>{
         })
     }
 })
+*/
