@@ -22,6 +22,10 @@ class BaseLayout extends React.Component {
                         rel="stylesheet"
                         href="/static/css/styles.css"
                     />
+                    <link
+                        rel="stylesheet"
+                        href="/static/css/chat.css"
+                    />
                 </head>
                 <body className={this.props.bodyClass}>
                     {this.props.children}

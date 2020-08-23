@@ -37,8 +37,8 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jsx');
 app.engine('jsx', require('express-react-views').createEngine());
 
-const broadcast_io = require('./socket_broadcast')
-broadcast_io(server)
+const room_io = require('./socket_room')
+room_io(server)
 
 app.get('/',(req,res)=>{
     res.render('index');
@@ -67,7 +67,7 @@ app.get('/room',(req,res)=>{
     if(!req.session.username){
         return res.redirect('/join_room')
     }
-    res.render('room',{title:req.session.room+' Room',activeList:['Frank','Abby','Joel','Elly']})
+    res.render('room',{title:req.session.room+' Room',username:req.session.username})
 })
 
 app.post('/logout',(req,res)=>{
