@@ -1,6 +1,16 @@
 const chat_box = document.getElementById('chat-box')
+
 var username = document.querySelector('#username').textContent
+var room = document.querySelector('#room').textContent
+
 var socket = io()
+
+socket.emit('join',{username,room})
+
+socket.on('message',(message)=>{
+    console.log(message)
+})
+
 var messages = document.getElementById('messages')
 
 // inputs
@@ -59,7 +69,6 @@ function generateChat(current_session_array){
     return innerHTML
 }
 
-
 socket.on('welcome',(current_session_array)=>{
     console.log(current_session_array)
     messages.innerHTML = generateChat(current_session_array)
@@ -75,10 +84,8 @@ sendButton.addEventListener('click',(e)=>{
     e.preventDefault()
 
     written = message_box.value
-
+    message_box.value = ''
     if(written!=""){
-        socket.emit('sendMessage',username,written,(message)=>{
-            console.log(message)
-        })
+        socket.emit('sendMessage',username,room,written)
     }
 })

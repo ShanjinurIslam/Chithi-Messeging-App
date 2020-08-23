@@ -6,7 +6,7 @@ const { Form, Nav, Container, Row, Col, FormGroup } = require('react-bootstrap')
 function NavBar(props) {
     return (
         <Nav className="navbar navbar-light bg-light justify-content-between">
-            <a className="navbar-brand">{props.title}</a>
+            <a id="room" className="navbar-brand">{props.title}</a>
             <Form action="/logout" method="POST" className="form-inline">
                 <div className="mr-2">
                     Logged In as 

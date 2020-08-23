@@ -94,3 +94,19 @@ socket.on('welcome',(message)=>{
 })
 ```
 
+## Broadcast Message
+
+This sends message to all users currently active.
+
+```javascript
+io.emit("broadcast",message)
+```
+
+### Broadcast to all other clients
+
+```javascript
+socket.broadcast.emit('message','A new user has joined')
+```
+
+## Introduction to Socket IO Rooms
+
