@@ -19,12 +19,21 @@ function room_socket(server){
 
     io.on('connection',(socket)=>{
 
-        socket.on('join',({username,room})=>{
+        socket.on('join',({username,room},callback)=>{
+
+            console.log(username,room)
+
+            const {error,user} = addUser(socket.id,username,room)
+
             socket.join(room)
+
+            if(error){
+                return callback(error)
+            }
 
             if(room in room_dict){
                 console.log("New websocket connect")
-                socket.broadcast.to(room).emit('message',username+'has joined '+room)
+                socket.broadcast.to(room).emit('message',user.username+' has joined '+user.room)
                 socket.emit("welcome",room_dict[room])
             }
             else{
@@ -32,28 +41,23 @@ function room_socket(server){
                 room_dict[room] = current_session_array
                 socket.emit("welcome",room_dict[room])
             }
+
+            callback()
         })
 
         socket.on('sendMessage',(username,room,message)=>{
-            console.log(username,room,message)
             var singleMessage = generate_message(username,message)
             room_dict[room].push(singleMessage)
             io.to(room).emit("broadcast",singleMessage)
         })
 
-        /*
-        socket.on('join',(username)=>{
-            current_users_in_session.push(username)
-            socket.broadcast.emit('activeList',current_users_in_session)
-        })*/
-        
-        /*
-        socket.on('sendMessage',(username,message,callback)=>{
-            var singleMessage = generate_message(username,message)
-            current_session_array.push(singleMessage)
-            io.emit("broadcast",singleMessage)
-            callback('Delivered at '+new Date().toLocaleTimeString())
-        })*/
+        socket.on('disconnect',()=>{
+            const user = removeUser(socket.id)
+            console.log(user)
+            if(user){
+                io.to(user.room).emit('message',user.username+'has left')
+            }
+        })
     })
 }
 

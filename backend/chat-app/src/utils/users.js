@@ -1,9 +1,8 @@
 const users = []
 
 const addUser = (id,username,room)=>{
-
     username = username.trim().toLowerCase()
-    room = username.trim().toLowerCase()
+    room = room.trim().toLowerCase()
 
     const existingUser = users.find((user)=>{
         return user.room == room && user.username == username
@@ -16,11 +15,15 @@ const addUser = (id,username,room)=>{
     }
 
     const user = {id,username,room}
+
+    console.log(user)
+
     users.push(user)
     return {user}
 }
 
 const removeUser = (id)=>{
+    console.log(users,id)
     const index = users.findIndex((user)=>{
         return user.id == id
     })

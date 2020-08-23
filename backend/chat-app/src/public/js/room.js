@@ -1,11 +1,16 @@
 const chat_box = document.getElementById('chat-box')
 
 var username = document.querySelector('#username').textContent
-var room = document.querySelector('#room').textContent
+var room = document.querySelector('#room').textContent.split()[0]
 
 var socket = io()
 
-socket.emit('join',{username,room})
+socket.emit('join',{username,room},(error)=>{
+    if(error){
+        //window.history.go(-1)
+        return false
+    }
+})
 
 socket.on('message',(message)=>{
     console.log(message)

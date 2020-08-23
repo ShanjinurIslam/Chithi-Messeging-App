@@ -58,6 +58,7 @@ app.post('/join_room',(req,res)=>{
     if(username=="" || room == ""){
         return res.render('room_login',{error:'username/room name missing'})
     }
+
     req.session.username = username
     req.session.room = room
     res.redirect('/room')
