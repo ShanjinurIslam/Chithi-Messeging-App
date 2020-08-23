@@ -1,19 +1,39 @@
 const chat_box = document.getElementById('chat-box')
 
 var username = document.querySelector('#username').textContent
-var room = document.querySelector('#room').textContent.split()[0]
+var room = document.querySelector('#room').textContent.split(' ')[0]
+var activeList = document.querySelector('#activeList');
 
 var socket = io()
 
-socket.emit('join',{username,room},(error)=>{
-    if(error){
-        //window.history.go(-1)
-        return false
-    }
+socket.emit('join',{username,room})
+
+socket.on('userLeft',(room_users)=>{
+    room_users = room_users.filter((e) =>{
+        e.username != username.trim().toLowerCase()
+    })
+    console.log(room_users)
+    activeList.innerHTML = generateUserList(room_users)
 })
 
 socket.on('message',(message)=>{
     console.log(message)
+})
+
+const generateActiveUser = (object)=>{
+    return `<a href="#" className="list-group-item list-group-item-action">${object.username}</a>`
+}   
+
+const generateUserList = (arr)=>{
+    var innerHTML = ''
+    for(var i=0;i<arr.length;i++){
+        innerHTML += generateActiveUser(arr[i])
+    }
+    return innerHTML
+}
+
+socket.on('new_user',(user)=>{
+    activeList.innerHTML += generateActiveUser(user)
 })
 
 var messages = document.getElementById('messages')
@@ -74,9 +94,9 @@ function generateChat(current_session_array){
     return innerHTML
 }
 
-socket.on('welcome',(current_session_array)=>{
-    console.log(current_session_array)
+socket.on('welcome',(current_session_array,users)=>{
     messages.innerHTML = generateChat(current_session_array)
+    activeList.innerHTML = generateUserList(users)
     chat_box.scrollTop = chat_box.scrollHeight
 })
 

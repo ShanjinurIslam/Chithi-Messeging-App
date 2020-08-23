@@ -19,30 +19,30 @@ function room_socket(server){
 
     io.on('connection',(socket)=>{
 
-        socket.on('join',({username,room},callback)=>{
-
-            console.log(username,room)
+        socket.on('join',({username,room})=>{
 
             const {error,user} = addUser(socket.id,username,room)
 
-            socket.join(room)
-
             if(error){
-                return callback(error)
-            }
-
-            if(room in room_dict){
-                console.log("New websocket connect")
-                socket.broadcast.to(room).emit('message',user.username+' has joined '+user.room)
-                socket.emit("welcome",room_dict[room])
+                // have to handle error staff
             }
             else{
-                var current_session_array = []
-                room_dict[room] = current_session_array
-                socket.emit("welcome",room_dict[room])
-            }
+                socket.join(room)
+                room_users = getUsersInRoom(room)
+                room_users = room_users.filter((e)=>e.id!=user.id)
+                socket.broadcast.to(room).emit('new_user',user)
 
-            callback()
+                if(room in room_dict){
+                    console.log("New websocket connect")
+                    socket.broadcast.to(room).emit('message',user.username+' has joined '+user.room)
+                    socket.emit("welcome",room_dict[room],room_users)
+                }
+                else{
+                    var current_session_array = []
+                    room_dict[room] = current_session_array
+                    socket.emit("welcome",room_dict[room],room_users)
+                }
+            }
         })
 
         socket.on('sendMessage',(username,room,message)=>{
@@ -53,9 +53,10 @@ function room_socket(server){
 
         socket.on('disconnect',()=>{
             const user = removeUser(socket.id)
-            console.log(user)
+            room_users = room_users.filter((e)=>e.id!=user.id)
+
             if(user){
-                io.to(user.room).emit('message',user.username+'has left')
+                io.to(user.room).emit('userLeft',room_users)
             }
         })
     })

@@ -23,7 +23,7 @@ function NavBar(props) {
 function Friends(props) {
     var friends = []
     for (var i = 0; i < props.friends.length; i++) {
-        friends.push(<a href="#" className="list-group-item list-group-item-action">{props.friends[i]}</a>);
+        
     }
     return friends
 }*/

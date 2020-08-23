@@ -16,14 +16,11 @@ const addUser = (id,username,room)=>{
 
     const user = {id,username,room}
 
-    console.log(user)
-
     users.push(user)
     return {user}
 }
 
 const removeUser = (id)=>{
-    console.log(users,id)
     const index = users.findIndex((user)=>{
         return user.id == id
     })
