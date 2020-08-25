@@ -63,7 +63,7 @@ class _ChatState extends State<Chats> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(33, 20, 33, 33),
+            padding: EdgeInsets.fromLTRB(33, 20, 33, 20),
             child: Row(
               children: [
                 Text(
@@ -80,59 +80,62 @@ class _ChatState extends State<Chats> {
           ),
           Expanded(
               child: ListView.builder(
-                  padding: EdgeInsets.only(top: 20),
+                  //padding: EdgeInsets.only(top: 20),
                   physics: BouncingScrollPhysics(),
                   itemCount: 10,
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      margin: EdgeInsets.fromLTRB(33, 13.5, 33, 13.5),
-                      height: 50,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 25,
-                            backgroundColor: Colors.grey,
-                          ),
-                          Spacer(
-                            flex: 1,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'data',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700),
+                    return FlatButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/thread');
+                        },
+                        child: Container(
+                          margin: EdgeInsets.fromLTRB(13, 13.5, 13, 13.5),
+                          height: 50,
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 25,
+                                backgroundColor: Colors.grey,
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 20),
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: 5),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Avatar Name',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                      Text('Recent Text.....'),
+                                    ],
+                                  ),
                                 ),
-                                Text('data'),
-                              ],
-                            ),
-                          ),
-                          Spacer(
-                            flex: 9,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 5),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '03:41 AM',
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w300),
+                              ),
+                              Spacer(),
+                              Padding(
+                                padding: EdgeInsets.only(top: 5),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '03:41 AM',
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w300),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
+                        ));
                   }))
         ],
       ),
