@@ -1,4 +1,4 @@
-#Wed Aug 26 10:08:50 BDT 2020
-base.0=/Users/spondon/Desktop/Chithi/Chithi/build/app/intermediates/dex/debug/mergeDexDebug/out/classes.dex
+#Thu Aug 27 03:07:30 BDT 2020
+base.0=/Users/spondon/Desktop/Chithi/build/app/intermediates/dex/debug/mergeDexDebug/out/classes.dex
 path.0=classes.dex
 renamed.0=classes.dex

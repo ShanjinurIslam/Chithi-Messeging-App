@@ -30,12 +30,21 @@ class _ChatThreadState extends State<ChatThread> {
       'transports': ['websocket'],
       'autoConnect': false,
     });
+
     socket.connect();
+
+    socket.on('connect', (_) {
+      print('connected');
+      socket.emit('join', 0);
+    });
+
+    socket.on('newUser', (data) => print(data));
+
     socket.on('receive_message', (data) {
       String message = data.toString();
       setState(() {
-        messages.add(new Message(message, false));
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+        messages.insert(0, new Message(message, false));
+        _scrollController.animateTo(_scrollController.position.minScrollExtent,
             duration: Duration(milliseconds: 600), curve: Curves.easeIn);
       });
     });
@@ -52,7 +61,7 @@ class _ChatThreadState extends State<ChatThread> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(33, 26, 25, 20),
+              padding: EdgeInsets.fromLTRB(25, 26, 25, 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -98,6 +107,7 @@ class _ChatThreadState extends State<ChatThread> {
             ),
             Expanded(
               child: ListView.builder(
+                reverse: true,
                 controller: _scrollController,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (BuildContext context, int index) {
@@ -206,9 +216,9 @@ class _ChatThreadState extends State<ChatThread> {
                         socket.emit('send_message', message);
                         setState(() {
                           _textEditingController.clear();
-                          messages.add(new Message(message, true));
+                          messages.insert(0, new Message(message, true));
                           _scrollController.animateTo(
-                              _scrollController.position.maxScrollExtent,
+                              _scrollController.position.minScrollExtent,
                               duration: Duration(milliseconds: 600),
                               curve: Curves.easeIn);
                         });

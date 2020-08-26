@@ -17,7 +17,7 @@ class _ChatState extends State<Chats> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(33),
+            padding: EdgeInsets.all(25),
             child: Row(
               children: [
                 Text(
@@ -29,18 +29,18 @@ class _ChatState extends State<Chats> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(33, 0, 33, 0),
+            padding: EdgeInsets.fromLTRB(25, 0, 25, 0),
             child: TextField(
               decoration: InputDecoration(
                   hintText: 'Search', prefixIcon: Icon(Icons.search)),
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(0, 33, 0, 13),
+            padding: EdgeInsets.fromLTRB(0, 25, 0, 13),
             child: Container(
               height: 70,
               child: ListView.builder(
-                padding: EdgeInsets.only(left: 33),
+                padding: EdgeInsets.only(left: 25),
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (BuildContext context, int index) {
@@ -63,7 +63,7 @@ class _ChatState extends State<Chats> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(33, 20, 33, 20),
+            padding: EdgeInsets.fromLTRB(25, 20, 25, 20),
             child: Row(
               children: [
                 Text(
