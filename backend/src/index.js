@@ -1,14 +1,20 @@
 const express = require('express')
-const http = require('http')
+const https = require('https');
+const fs = require('fs');
+
+const options = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
+  };
 
 const api_router = require('./routers/api')
 const socket = require('./socket')
 
 app = express()
 
-server = http.createServer(app)
-socket(server)
+server = https.createServer(options)
 
+socket(server)
 
 app.use('/api',api_router)
 

@@ -1,1 +1,0 @@
-npx wscat -c ws://192.168.0.116:3000/socket.io/\?transport=websocket
