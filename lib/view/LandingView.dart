@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class LandingView extends StatelessWidget {
@@ -5,7 +7,12 @@ class LandingView extends StatelessWidget {
   Widget build(Object context) {
     return Scaffold(
       body: Center(
-        child: Text('Hello World'),
+        child: FlatButton(
+          child: Text('Go to login'),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/login');
+          },
+        ),
       ),
     );
   }
