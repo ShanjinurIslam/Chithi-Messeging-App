@@ -12,10 +12,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Chithi',
       theme: ThemeData(
-        fontFamily: 'Quicksand',
+        brightness: Brightness.light,
+        //fontFamily: 'Quicksand',
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      darkTheme: ThemeData(brightness: Brightness.dark),
       routes: routes,
     );
   }
