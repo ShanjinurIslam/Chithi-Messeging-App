@@ -53,6 +53,12 @@ class _ChatThreadState extends State<ChatThread> {
   }
 
   @override
+  void dispose() {
+    socket.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(

@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Chats.dart';
+
 class LoginView extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -119,13 +121,22 @@ class _LoginViewState extends State<LoginView> {
                                     username, password);
                                 SharedPreferences sharedPreferences =
                                     await SharedPreferences.getInstance();
+                                await sharedPreferences.setInt('id', user.id);
                                 await sharedPreferences.setString(
                                     'username', user.username);
                                 await sharedPreferences.setString(
                                     'token', user.token);
 
-                                Navigator.pushReplacementNamed(
-                                    context, '/chats');
+                                Navigator.of(context).push(new PageRouteBuilder(
+                                    pageBuilder: (BuildContext context, _, __) {
+                                  return new Chats(user);
+                                }, transitionsBuilder: (_,
+                                        Animation<double> animation,
+                                        __,
+                                        Widget child) {
+                                  return new FadeTransition(
+                                      opacity: animation, child: child);
+                                }));
                               } catch (error) {
                                 print(error);
                                 _key.currentState.showSnackBar(SnackBar(

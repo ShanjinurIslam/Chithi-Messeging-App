@@ -1,6 +1,14 @@
+import 'package:Chithi/model/User.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../static.dart';
 
 class Chats extends StatefulWidget {
+  final User user;
+
+  Chats(this.user);
+
   @override
   State<StatefulWidget> createState() {
     return _ChatState();
@@ -8,6 +16,8 @@ class Chats extends StatefulWidget {
 }
 
 class _ChatState extends State<Chats> {
+  SharedPreferences preferences;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +34,12 @@ class _ChatState extends State<Chats> {
                   'Chats',
                   style: TextStyle(fontSize: 48, fontWeight: FontWeight.w400),
                 ),
-                Spacer()
+                Spacer(),
+                CircleAvatar(
+                  key: UniqueKey(),
+                  backgroundImage:
+                      NetworkImage(getAvatar + widget.user.id.toString()),
+                ),
               ],
             ),
           ),

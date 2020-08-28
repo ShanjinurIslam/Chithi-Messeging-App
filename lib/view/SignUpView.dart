@@ -1,4 +1,8 @@
+import 'package:Chithi/controller/AuthController.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:Chithi/model/User.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpView extends StatefulWidget {
   @override
@@ -108,20 +112,53 @@ class _SignUpViewState extends State<SignUpView> {
                     color: Colors.green,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25)),
-                    onPressed: () {
-                      _formKey.currentState.validate();
-                    },
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            if (_formKey.currentState.validate()) {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              String username = _usernameController.text;
+                              String password = _pwdController.text;
+
+                              try {
+                                User user = await AuthController.signUp(
+                                    username, password);
+                                SharedPreferences sharedPreferences =
+                                    await SharedPreferences.getInstance();
+
+                                await sharedPreferences.setInt('id', user.id);
+                                await sharedPreferences.setString(
+                                    'username', user.username);
+                                await sharedPreferences.setString(
+                                    'token', user.token);
+
+                                Navigator.pushNamedAndRemoveUntil(
+                                    context, '/uploadAvatar', (route) => false,
+                                    arguments: user);
+                              } catch (error) {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                                _key.currentState.showSnackBar(
+                                    SnackBar(content: Text(error.toString())));
+                              }
+                            }
+                          },
                     child: Container(
                       height: 50,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'Sign Up',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700),
-                          )
+                          _isLoading
+                              ? CupertinoActivityIndicator()
+                              : Text(
+                                  'Sign Up',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700),
+                                )
                         ],
                       ),
                     )),

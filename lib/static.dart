@@ -6,6 +6,7 @@ final createUserUrl = baseUrl + '/user/create';
 final readUserUrl = baseUrl + '/user/read';
 final updateUserUrl = baseUrl + '/user/update';
 final uploadAvatarUrl = baseUrl + '/user/upload';
+final getAvatar = baseUrl + '/user/avatar/';
 final deleteUser = '/user/delete';
 
 final logInUrl = baseUrl + '/login';
