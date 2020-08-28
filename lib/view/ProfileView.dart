@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:Chithi/controller/AuthController.dart';
 import 'package:Chithi/model/User.dart';
 import 'package:Chithi/static.dart';
@@ -7,7 +5,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:socket_io_client/socket_io_client.dart';
+
 class ProfileView extends StatefulWidget {
+  final User user;
+  final Socket socket;
+
+  ProfileView({this.user, this.socket});
+
   @override
   State<StatefulWidget> createState() {
     return new _ProfileViewState();
@@ -20,13 +25,12 @@ class _ProfileViewState extends State<ProfileView> {
 
   @override
   void dispose() {
+    widget.socket.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final User user = ModalRoute.of(context).settings.arguments;
-
     return Scaffold(
       key: _key,
       body: Center(
@@ -58,12 +62,12 @@ class _ProfileViewState extends State<ProfileView> {
                   CircleAvatar(
                     radius: MediaQuery.of(context).size.width / 4,
                     backgroundImage:
-                        NetworkImage(getAvatar + user.id.toString()),
+                        NetworkImage(getAvatar + widget.user.id.toString()),
                   ),
                   Padding(
                     padding: EdgeInsets.all(25),
                     child: Text(
-                      '@' + user.username,
+                      '@' + widget.user.username,
                       style:
                           TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
@@ -80,6 +84,7 @@ class _ProfileViewState extends State<ProfileView> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25)),
                   onPressed: () async {
+                    widget.socket.disconnect();
                     setState(() {
                       _isLoading = true;
                     });

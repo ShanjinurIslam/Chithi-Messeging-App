@@ -30,7 +30,7 @@ class _LandingViewState extends State<LandingView> {
         Timer(
             Duration(milliseconds: 500),
             () => {
-                  Navigator.of(context).push(new PageRouteBuilder(
+                  Navigator.of(context).pushReplacement(new PageRouteBuilder(
                       pageBuilder: (BuildContext context, _, __) {
                     return new Chats(user);
                   }, transitionsBuilder:
@@ -42,7 +42,7 @@ class _LandingViewState extends State<LandingView> {
         Timer(
             Duration(milliseconds: 500),
             () => {
-                  Navigator.of(context).push(new PageRouteBuilder(
+                  Navigator.of(context).pushReplacement(new PageRouteBuilder(
                       pageBuilder: (BuildContext context, _, __) {
                     return new LoginView();
                   }, transitionsBuilder:

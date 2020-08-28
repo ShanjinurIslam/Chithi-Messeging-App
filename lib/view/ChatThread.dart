@@ -17,7 +17,8 @@ class ChatThread extends StatefulWidget {
 }
 
 class _ChatThreadState extends State<ChatThread> {
-  IO.Socket socket;
+  /*
+  IO.Socket socket;*/
 
   final _scrollController = new ScrollController();
   List<Message> messages = [];
@@ -26,6 +27,7 @@ class _ChatThreadState extends State<ChatThread> {
 
   @override
   void initState() {
+    /*
     socket = IO.io('https://chithiapp.herokuapp.com/', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
@@ -48,13 +50,14 @@ class _ChatThreadState extends State<ChatThread> {
             duration: Duration(milliseconds: 600), curve: Curves.easeIn);
       });
     });
-    socket.on('disconnect', (_) => print('disconnect'));
+    socket.on('disconnect', (_) => print('disconnect'));*/
     super.initState();
   }
 
   @override
   void dispose() {
-    socket.dispose();
+    /*
+    socket.dispose();*/
     super.dispose();
   }
 
@@ -219,7 +222,8 @@ class _ChatThreadState extends State<ChatThread> {
                     onPressed: () {
                       if (_textEditingController.text.isNotEmpty) {
                         String message = _textEditingController.text;
-                        socket.emit('send_message', message);
+                        /*
+                        socket.emit('send_message', message);*/
                         setState(() {
                           _textEditingController.clear();
                           messages.insert(0, new Message(message, true));
