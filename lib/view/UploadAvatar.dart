@@ -151,8 +151,8 @@ class _UploadAvatarViewState extends State<UploadAvatarView> {
                               setState(() {
                                 _isUploading = false;
                               });
-                              _key.currentState.showSnackBar(
-                                  SnackBar(content: Text(error.toString())));
+                              _key.currentState.showSnackBar(SnackBar(
+                                  content: Text(error.message.toString())));
                             }
                           } else {
                             Navigator.of(context).pushReplacement(

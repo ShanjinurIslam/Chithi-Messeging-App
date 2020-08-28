@@ -13,8 +13,8 @@ class AuthController {
       Map<String, dynamic> json = response.data;
       User user = User.fromJson(json);
       return user;
-    } catch (error) {
-      throw new Exception(error);
+    } on DioError catch (error) {
+      throw new Exception(error.response.data);
     }
   }
 
@@ -27,11 +27,12 @@ class AuthController {
       Map<String, dynamic> json = response.data;
       User user = User.fromJson(json);
       return user;
-    } catch (error) {
-      throw new Exception(error);
+    } on DioError catch (error) {
+      throw new Exception(error.response.data);
     }
   }
 
+  // ignore: missing_return
   static Future<int> uploadAvatar(File _image, String token) async {
     Response response;
     Dio dio = new Dio();
@@ -47,8 +48,23 @@ class AuthController {
       if (response.statusCode == 200) {
         return 200;
       }
-    } catch (error) {
-      throw new Exception(error);
+    } on DioError catch (error) {
+      throw new Exception(error.response.data);
+    }
+  }
+
+  // ignore: missing_return
+  static Future<int> logOut(String token) async {
+    Response response;
+    Dio dio = new Dio();
+    dio.options.headers["authorization"] = "Bearer $token";
+    try {
+      response = await dio.post(logOutUrl);
+      if (response.statusCode == 200) {
+        return 200;
+      }
+    } on DioError catch (error) {
+      throw new Exception(error.response.data);
     }
   }
 }

@@ -1,5 +1,5 @@
 //final BASE_URL = 'https://chithiapp.herokuapp.com';
-final baseUrl = 'http://192.168.0.101:3000/api';
+final baseUrl = 'https://chithiapp.herokuapp.com/api';
 final createUserUrl = baseUrl + '/user/create';
 
 // all of these will require auth token

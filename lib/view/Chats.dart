@@ -35,10 +35,15 @@ class _ChatState extends State<Chats> {
                   style: TextStyle(fontSize: 48, fontWeight: FontWeight.w400),
                 ),
                 Spacer(),
-                CircleAvatar(
-                  key: UniqueKey(),
-                  backgroundImage:
-                      NetworkImage(getAvatar + widget.user.id.toString()),
+                InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/profile',
+                        arguments: widget.user);
+                  },
+                  child: CircleAvatar(
+                    backgroundImage:
+                        NetworkImage(getAvatar + widget.user.id.toString()),
+                  ),
                 ),
               ],
             ),

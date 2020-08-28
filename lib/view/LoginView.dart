@@ -140,8 +140,7 @@ class _LoginViewState extends State<LoginView> {
                               } catch (error) {
                                 print(error);
                                 _key.currentState.showSnackBar(SnackBar(
-                                    content:
-                                        Text('Invalid Username/Password')));
+                                    content: Text(error.message.toString())));
                                 setState(() {
                                   _isLoading = false;
                                 });

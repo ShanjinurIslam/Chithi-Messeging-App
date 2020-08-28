@@ -141,8 +141,8 @@ class _SignUpViewState extends State<SignUpView> {
                                 setState(() {
                                   _isLoading = false;
                                 });
-                                _key.currentState.showSnackBar(
-                                    SnackBar(content: Text(error.toString())));
+                                _key.currentState.showSnackBar(SnackBar(
+                                    content: Text(error.message.toString())));
                               }
                             }
                           },
