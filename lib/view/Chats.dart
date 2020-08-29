@@ -1,4 +1,5 @@
 import 'package:Chithi/controller/ChatThreadController.dart';
+import 'package:Chithi/model/Message.dart';
 import 'package:Chithi/model/ThreadItem.dart';
 import 'package:Chithi/model/User.dart';
 import 'package:Chithi/view/ChatThread.dart';
@@ -77,9 +78,24 @@ class _ChatState extends State<Chats> {
       if (index != -1) {
         activeThreads[index].lastMessage.content = data['content'];
         activeThreads[index].lastMessage.createdAt = DateTime.now();
+
+        var temp = activeThreads[index];
+        activeThreads.removeAt(index);
+        activeThreads.insert(0, temp);
       } else {
-        // create a new thread
-        activeThreads.add(ThreadItem.fromJSON(data));
+        print('I am here' + data.toString());
+        ThreadItem item = ThreadItem(
+            threadID: data['threadID'],
+            lastMessage: new Message(
+                createdAt: DateTime.now(),
+                content: data['content'],
+                receiver: new User(
+                    id: data['receiver']['_id'],
+                    username: data['receiver']['username']),
+                sender: new User(
+                    id: data['sender']['_id'],
+                    username: data['sender']['username'])));
+        activeThreads.insert(0, item);
       }
       setState(() {});
     });
@@ -162,9 +178,7 @@ class _ChatState extends State<Chats> {
                                     return new ChatThreadView(
                                         user: widget.user,
                                         socket: _socket,
-                                        receiver: friends[index],
-                                        threadID:
-                                            activeThreads[index].threadID);
+                                        receiver: friends[index]);
                                   }, transitionsBuilder: (_,
                                           Animation<double> animation,
                                           __,

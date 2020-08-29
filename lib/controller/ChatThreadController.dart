@@ -37,6 +37,21 @@ class ChatThreadController {
     }
   }
 
+  static Future<String> getChatThread(String token, int receiver) async {
+    Response response;
+    Dio dio = new Dio();
+    dio.options.headers["authorization"] = "Bearer $token";
+    try {
+      response = await dio.post(checkThread, data: {
+        "receiver": receiver,
+      });
+      print(response.data);
+      return response.data.toString();
+    } on DioError catch (error) {
+      throw new Exception(error.response.data);
+    }
+  }
+
   static void storeMessage(String token, int sender, int receiver,
       String threadID, String content) async {
     Response response;

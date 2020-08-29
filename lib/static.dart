@@ -20,6 +20,7 @@ final logOutUrl = baseUrl + '/logout';
 final accessThreads = baseUrl + '/threads';
 final storeMessageUrl = baseUrl + '/store_message';
 final singleThread = baseUrl + '/threads/';
+final checkThread = baseUrl + '/checkThreadExists';
 
 String getTime(DateTime time) {
   return new DateFormat.jm().format(time).toString();

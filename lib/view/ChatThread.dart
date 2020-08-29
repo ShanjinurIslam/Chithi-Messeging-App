@@ -6,6 +6,7 @@ import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 import '../static.dart';
 
@@ -29,8 +30,6 @@ class ChatThreadView extends StatefulWidget {
 }
 
 class _ChatThreadState extends State<ChatThreadView> {
-  /*
-  IO.Socket socket;*/
   ChatThread chatThread = new ChatThread();
 
   final _scrollController = new ScrollController();
@@ -42,6 +41,19 @@ class _ChatThreadState extends State<ChatThreadView> {
       chatThread = await ChatThreadController.accessChatThread(
           widget.user.token, widget.threadID);
       setState(() {});
+    } else {
+      try {
+        widget.threadID = await ChatThreadController.getChatThread(
+            widget.user.token, widget.receiver.id);
+        chatThread = await ChatThreadController.accessChatThread(
+            widget.user.token, widget.threadID);
+        setState(() {});
+      } catch (error) {
+        widget.threadID = Uuid().v4().toString();
+        print(widget.threadID);
+        setState(() {});
+      }
+      // find common chat thread id, have to write an api
     }
   }
 
@@ -297,14 +309,14 @@ class _ChatThreadState extends State<ChatThreadView> {
                               'username': widget.receiver.username
                             },
                             'content': message,
-                            'threadID': chatThread.threadID,
+                            'threadID': widget.threadID,
                             'createdAt': DateTime.now().toString()
                           });
                           ChatThreadController.storeMessage(
                               widget.user.token,
                               widget.user.id,
                               widget.receiver.id,
-                              chatThread.threadID,
+                              widget.threadID,
                               message);
                           _scrollController.animateTo(
                               _scrollController.position.minScrollExtent,
