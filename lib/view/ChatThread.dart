@@ -2,6 +2,8 @@ import 'package:Chithi/controller/ChatThreadController.dart';
 import 'package:Chithi/model/Message.dart';
 import 'package:Chithi/model/User.dart';
 import 'package:Chithi/model/ChatThread.dart';
+import 'package:Chithi/model/UserData.dart';
+import 'package:Chithi/view/Chats.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -10,13 +12,16 @@ import 'package:uuid/uuid.dart';
 
 import '../static.dart';
 
+// ignore: must_be_immutable
 class ChatThreadView extends StatefulWidget {
   final User user;
   final User receiver;
   final Socket socket;
   String threadID;
+  final UserData userData;
 
   ChatThreadView({
+    this.userData,
     this.user,
     this.receiver,
     this.threadID,
@@ -59,6 +64,7 @@ class _ChatThreadState extends State<ChatThreadView> {
 
   @override
   void initState() {
+    super.initState();
     getChat();
     widget.socket.on('receive_message', (map) {
       print(map);
@@ -73,13 +79,11 @@ class _ChatThreadState extends State<ChatThreadView> {
         setState(() {});
       }
     });
-    super.initState();
   }
 
   @override
   void dispose() {
-    /*
-    socket.dispose();*/
+    widget.socket.dispose();
     super.dispose();
   }
 
@@ -126,7 +130,18 @@ class _ChatThreadState extends State<ChatThreadView> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.pop(context);
+                          widget.socket.disconnect();
+                          Navigator.of(context).pushReplacement(
+                              new PageRouteBuilder(
+                                  pageBuilder: (BuildContext context, _, __) {
+                            return new Chats(widget.user);
+                          }, transitionsBuilder: (_,
+                                      Animation<double> animation,
+                                      __,
+                                      Widget child) {
+                            return new FadeTransition(
+                                opacity: animation, child: child);
+                          }));
                         },
                         child: Icon(
                           CupertinoIcons.clear,
@@ -299,7 +314,8 @@ class _ChatThreadState extends State<ChatThreadView> {
                                   receiver: widget.receiver,
                                   content: message,
                                   createdAt: DateTime.now().toUtc()));
-                          widget.socket.emit('send_message', {
+
+                          var object = {
                             'sender': {
                               '_id': widget.user.id,
                               'username': widget.user.username
@@ -310,8 +326,19 @@ class _ChatThreadState extends State<ChatThreadView> {
                             },
                             'content': message,
                             'threadID': widget.threadID,
-                            'createdAt': DateTime.now().toString()
-                          });
+                            'createdAt': DateTime.now().toUtc().toString()
+                          };
+
+                          widget.socket.emit('send_message', object);
+
+                          int index =
+                              widget.userData.findIndex(widget.threadID);
+                          if (index != -1) {
+                            widget.userData.updateActiveThread(index, message);
+                          } else {
+                            widget.userData.addActiveThread(object);
+                          }
+
                           ChatThreadController.storeMessage(
                               widget.user.token,
                               widget.user.id,

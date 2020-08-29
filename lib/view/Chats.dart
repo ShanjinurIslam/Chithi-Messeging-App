@@ -1,7 +1,6 @@
 import 'package:Chithi/controller/ChatThreadController.dart';
-import 'package:Chithi/model/Message.dart';
-import 'package:Chithi/model/ThreadItem.dart';
 import 'package:Chithi/model/User.dart';
+import 'package:Chithi/model/UserData.dart';
 import 'package:Chithi/view/ChatThread.dart';
 import 'package:Chithi/view/ProfileView.dart';
 import 'package:flutter/material.dart';
@@ -24,16 +23,19 @@ class _ChatState extends State<Chats> {
   GlobalKey<ScaffoldState> _key = new GlobalKey<ScaffoldState>();
   Socket _socket;
   List<User> friends = new List<User>();
-  List<ThreadItem> activeThreads = new List<ThreadItem>();
+  UserData userData = new UserData();
 
   void generateThreads() async {
-    activeThreads =
+    userData.activeThreads =
         await ChatThreadController.generateThreads(widget.user.token);
-    setState(() {});
+    if (this.mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void initState() {
+    super.initState();
     _socket = io(socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
@@ -44,10 +46,11 @@ class _ChatState extends State<Chats> {
     _socket.on(
         'connect',
         (_) => {
+              /*
               _key.currentState.showSnackBar(SnackBar(
                 content: Text('Connected'),
                 duration: Duration(milliseconds: 500),
-              ))
+              ))*/
             });
     generateThreads();
 
@@ -57,54 +60,38 @@ class _ChatState extends State<Chats> {
           friends.add(User.fromJson(active));
         }
 
-        setState(() {});
+        if (this.mounted) {
+          setState(() {});
+        }
       }
     });
 
     _socket.on('new_user', (user) {
       friends.add(User.fromJson(user));
-      setState(() {});
+      if (this.mounted) {
+        setState(() {});
+      }
     });
     _socket.on('remove_user', (user) {
       friends = friends.where((element) => element.id != user['_id']).toList();
-      setState(() {});
+      if (this.mounted) {
+        setState(() {});
+      }
     });
 
     _socket.on('thread_update', (data) {
       print(data);
-      int index = activeThreads
-          .indexWhere((element) => element.threadID == data['threadID']);
+      int index = userData.findIndex(data['threadID']);
 
       if (index != -1) {
-        activeThreads[index].lastMessage.content = data['content'];
-        activeThreads[index].lastMessage.createdAt = DateTime.now();
-
-        var temp = activeThreads[index];
-        activeThreads.removeAt(index);
-        activeThreads.insert(0, temp);
+        userData.updateActiveThread(index, data['content']);
       } else {
-        print('I am here' + data.toString());
-        ThreadItem item = ThreadItem(
-            threadID: data['threadID'],
-            lastMessage: new Message(
-                createdAt: DateTime.now(),
-                content: data['content'],
-                receiver: new User(
-                    id: data['receiver']['_id'],
-                    username: data['receiver']['username']),
-                sender: new User(
-                    id: data['sender']['_id'],
-                    username: data['sender']['username'])));
-        activeThreads.insert(0, item);
+        userData.addActiveThread(data);
       }
-      setState(() {});
+      if (this.mounted) {
+        setState(() {});
+      }
     });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -172,10 +159,11 @@ class _ChatState extends State<Chats> {
                             itemBuilder: (BuildContext context, int index) {
                               return GestureDetector(
                                 onTap: () {
-                                  Navigator.of(context).push(
+                                  Navigator.of(context).pushReplacement(
                                       new PageRouteBuilder(pageBuilder:
                                           (BuildContext context, _, __) {
                                     return new ChatThreadView(
+                                        userData: userData,
                                         user: widget.user,
                                         socket: _socket,
                                         receiver: friends[index]);
@@ -236,25 +224,31 @@ class _ChatState extends State<Chats> {
                   child: ListView.builder(
                       //padding: EdgeInsets.only(top: 20),
                       physics: BouncingScrollPhysics(),
-                      itemCount: activeThreads.length,
+                      itemCount: userData.activeThreads.length,
                       itemBuilder: (BuildContext context, int index) {
                         User receiver;
-                        if (activeThreads[index].lastMessage.sender.id ==
+                        if (userData
+                                .activeThreads[index].lastMessage.sender.id ==
                             widget.user.id) {
-                          receiver = activeThreads[index].lastMessage.receiver;
+                          receiver = userData
+                              .activeThreads[index].lastMessage.receiver;
                         } else {
-                          receiver = activeThreads[index].lastMessage.sender;
+                          receiver =
+                              userData.activeThreads[index].lastMessage.sender;
                         }
 
                         return FlatButton(
                             onPressed: () {
-                              Navigator.of(context).push(new PageRouteBuilder(
-                                  pageBuilder: (BuildContext context, _, __) {
+                              Navigator.of(context).pushReplacement(
+                                  new PageRouteBuilder(pageBuilder:
+                                      (BuildContext context, _, __) {
                                 return new ChatThreadView(
+                                    userData: userData,
                                     user: widget.user,
                                     socket: _socket,
                                     receiver: receiver,
-                                    threadID: activeThreads[index].threadID);
+                                    threadID:
+                                        userData.activeThreads[index].threadID);
                               }, transitionsBuilder: (_,
                                       Animation<double> animation,
                                       __,
@@ -284,16 +278,19 @@ class _ChatState extends State<Chats> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            activeThreads[index]
+                                            userData
+                                                        .activeThreads[index]
                                                         .lastMessage
                                                         .sender
                                                         .id ==
                                                     widget.user.id
-                                                ? activeThreads[index]
+                                                ? userData
+                                                    .activeThreads[index]
                                                     .lastMessage
                                                     .receiver
                                                     .username
-                                                : activeThreads[index]
+                                                : userData
+                                                    .activeThreads[index]
                                                     .lastMessage
                                                     .sender
                                                     .username,
@@ -301,9 +298,8 @@ class _ChatState extends State<Chats> {
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w700),
                                           ),
-                                          Text(activeThreads[index]
-                                              .lastMessage
-                                              .content),
+                                          Text(userData.activeThreads[index]
+                                              .lastMessage.content),
                                         ],
                                       ),
                                     ),
@@ -318,7 +314,8 @@ class _ChatState extends State<Chats> {
                                           CrossAxisAlignment.end,
                                       children: [
                                         Text(
-                                          getDayDiff(activeThreads[index]
+                                          getDayDiff(userData
+                                              .activeThreads[index]
                                               .lastMessage
                                               .createdAt),
                                           style: TextStyle(
@@ -326,9 +323,8 @@ class _ChatState extends State<Chats> {
                                               fontWeight: FontWeight.w300),
                                         ),
                                         Text(
-                                          getTime(activeThreads[index]
-                                              .lastMessage
-                                              .createdAt),
+                                          getTime(userData.activeThreads[index]
+                                              .lastMessage.createdAt),
                                           style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w300),
