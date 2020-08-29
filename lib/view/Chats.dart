@@ -1,5 +1,7 @@
-import 'package:Chithi/model/Friend.dart';
+import 'package:Chithi/controller/ChatThreadController.dart';
+import 'package:Chithi/model/ThreadItem.dart';
 import 'package:Chithi/model/User.dart';
+import 'package:Chithi/view/ChatThread.dart';
 import 'package:Chithi/view/ProfileView.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -20,11 +22,18 @@ class Chats extends StatefulWidget {
 class _ChatState extends State<Chats> {
   GlobalKey<ScaffoldState> _key = new GlobalKey<ScaffoldState>();
   Socket _socket;
-  List<Friend> friends = new List<Friend>();
+  List<User> friends = new List<User>();
+  List<ThreadItem> activeThreads = new List<ThreadItem>();
+
+  void generateThreads() async {
+    activeThreads =
+        await ChatThreadController.generateThreads(widget.user.token);
+    setState(() {});
+  }
 
   @override
   void initState() {
-    _socket = io('http://192.168.0.101:3000/', <String, dynamic>{
+    _socket = io(socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
@@ -39,15 +48,12 @@ class _ChatState extends State<Chats> {
                 duration: Duration(milliseconds: 500),
               ))
             });
+    generateThreads();
 
     _socket.on('active_list', (activeList) {
       if (activeList != 0) {
         for (var active in activeList) {
-          Friend friend = new Friend();
-          friend.id = active['_id'];
-          friend.username = active['username'];
-          friend.socketID = active['socketId'];
-          friends.add(friend);
+          friends.add(User.fromJson(active));
         }
 
         setState(() {});
@@ -55,15 +61,26 @@ class _ChatState extends State<Chats> {
     });
 
     _socket.on('new_user', (user) {
-      Friend friend = new Friend();
-      friend.id = user['_id'];
-      friend.username = user['username'];
-      friend.socketID = user['socketId'];
-      friends.add(friend);
+      friends.add(User.fromJson(user));
       setState(() {});
     });
     _socket.on('remove_user', (user) {
       friends = friends.where((element) => element.id != user['_id']).toList();
+      setState(() {});
+    });
+
+    _socket.on('thread_update', (data) {
+      print(data);
+      int index = activeThreads
+          .indexWhere((element) => element.threadID == data['threadID']);
+
+      if (index != -1) {
+        activeThreads[index].lastMessage.content = data['content'];
+        activeThreads[index].lastMessage.createdAt = DateTime.now();
+      } else {
+        // create a new thread
+        activeThreads.add(ThreadItem.fromJSON(data));
+      }
       setState(() {});
     });
     super.initState();
@@ -71,7 +88,6 @@ class _ChatState extends State<Chats> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -94,7 +110,7 @@ class _ChatState extends State<Chats> {
                           TextStyle(fontSize: 48, fontWeight: FontWeight.w400),
                     ),
                     Spacer(),
-                    InkWell(
+                    GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(new PageRouteBuilder(
                             pageBuilder: (BuildContext context, _, __) {
@@ -138,7 +154,26 @@ class _ChatState extends State<Chats> {
                             physics: BouncingScrollPhysics(),
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (BuildContext context, int index) {
-                              return Container(
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                      new PageRouteBuilder(pageBuilder:
+                                          (BuildContext context, _, __) {
+                                    return new ChatThreadView(
+                                        user: widget.user,
+                                        socket: _socket,
+                                        receiver: friends[index],
+                                        threadID:
+                                            activeThreads[index].threadID);
+                                  }, transitionsBuilder: (_,
+                                          Animation<double> animation,
+                                          __,
+                                          Widget child) {
+                                    return new FadeTransition(
+                                        opacity: animation, child: child);
+                                  }));
+                                },
+                                child: Container(
                                   margin: EdgeInsets.only(right: 20),
                                   child: Column(
                                     crossAxisAlignment:
@@ -154,7 +189,9 @@ class _ChatState extends State<Chats> {
                                       ),
                                       Text(friends[index].username)
                                     ],
-                                  ));
+                                  ),
+                                ),
+                              );
                             },
                             itemCount: friends.length,
                           ),
@@ -185,11 +222,32 @@ class _ChatState extends State<Chats> {
                   child: ListView.builder(
                       //padding: EdgeInsets.only(top: 20),
                       physics: BouncingScrollPhysics(),
-                      itemCount: 10,
+                      itemCount: activeThreads.length,
                       itemBuilder: (BuildContext context, int index) {
+                        User receiver;
+                        if (activeThreads[index].lastMessage.sender.id ==
+                            widget.user.id) {
+                          receiver = activeThreads[index].lastMessage.receiver;
+                        } else {
+                          receiver = activeThreads[index].lastMessage.sender;
+                        }
+
                         return FlatButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, '/thread');
+                              Navigator.of(context).push(new PageRouteBuilder(
+                                  pageBuilder: (BuildContext context, _, __) {
+                                return new ChatThreadView(
+                                    user: widget.user,
+                                    socket: _socket,
+                                    receiver: receiver,
+                                    threadID: activeThreads[index].threadID);
+                              }, transitionsBuilder: (_,
+                                      Animation<double> animation,
+                                      __,
+                                      Widget child) {
+                                return new FadeTransition(
+                                    opacity: animation, child: child);
+                              }));
                             },
                             child: Container(
                               margin: EdgeInsets.fromLTRB(13, 13.5, 13, 13.5),
@@ -198,7 +256,8 @@ class _ChatState extends State<Chats> {
                                 children: [
                                   CircleAvatar(
                                     radius: 25,
-                                    backgroundColor: Colors.grey,
+                                    backgroundImage: NetworkImage(
+                                        getAvatar + receiver.id.toString()),
                                   ),
                                   Container(
                                     margin: EdgeInsets.only(left: 20),
@@ -211,12 +270,26 @@ class _ChatState extends State<Chats> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Avatar Name',
+                                            activeThreads[index]
+                                                        .lastMessage
+                                                        .sender
+                                                        .id ==
+                                                    widget.user.id
+                                                ? activeThreads[index]
+                                                    .lastMessage
+                                                    .receiver
+                                                    .username
+                                                : activeThreads[index]
+                                                    .lastMessage
+                                                    .sender
+                                                    .username,
                                             style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w700),
                                           ),
-                                          Text('Recent Text.....'),
+                                          Text(activeThreads[index]
+                                              .lastMessage
+                                              .content),
                                         ],
                                       ),
                                     ),
@@ -231,7 +304,17 @@ class _ChatState extends State<Chats> {
                                           CrossAxisAlignment.end,
                                       children: [
                                         Text(
-                                          '03:41 AM',
+                                          getDayDiff(activeThreads[index]
+                                              .lastMessage
+                                              .createdAt),
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w300),
+                                        ),
+                                        Text(
+                                          getTime(activeThreads[index]
+                                              .lastMessage
+                                              .createdAt),
                                           style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w300),

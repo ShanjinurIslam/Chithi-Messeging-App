@@ -9,6 +9,5 @@ final routes = {
   '/': (BuildContext context) => LandingView(),
   '/login': (BuildContext context) => LoginView(),
   '/signUp': (BuildContext context) => SignUpView(),
-  '/thread': (BuildContext context) => ChatThread(),
   '/uploadAvatar': (BuildContext context) => UploadAvatarView(),
 };

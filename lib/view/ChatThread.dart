@@ -1,56 +1,66 @@
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:Chithi/controller/ChatThreadController.dart';
+import 'package:Chithi/model/Message.dart';
+import 'package:Chithi/model/User.dart';
+import 'package:Chithi/model/ChatThread.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class Message {
-  String text;
-  bool senderType;
-  Message(this.text, this.senderType);
-}
+import '../static.dart';
 
-class ChatThread extends StatefulWidget {
+class ChatThreadView extends StatefulWidget {
+  final User user;
+  final User receiver;
+  final Socket socket;
+  String threadID;
+
+  ChatThreadView({
+    this.user,
+    this.receiver,
+    this.threadID,
+    this.socket,
+  });
+
   @override
   State<StatefulWidget> createState() {
     return new _ChatThreadState();
   }
 }
 
-class _ChatThreadState extends State<ChatThread> {
+class _ChatThreadState extends State<ChatThreadView> {
   /*
   IO.Socket socket;*/
+  ChatThread chatThread = new ChatThread();
 
   final _scrollController = new ScrollController();
-  List<Message> messages = [];
 
   final _textEditingController = new TextEditingController();
 
+  void getChat() async {
+    if (widget.threadID != null) {
+      chatThread = await ChatThreadController.accessChatThread(
+          widget.user.token, widget.threadID);
+      setState(() {});
+    }
+  }
+
   @override
   void initState() {
-    /*
-    socket = IO.io('https://chithiapp.herokuapp.com/', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
+    getChat();
+    widget.socket.on('receive_message', (map) {
+      print(map);
+
+      if (map['sender']['_id'].toString() == widget.receiver.id.toString()) {
+        Message message = new Message(
+            sender: widget.receiver,
+            receiver: widget.user,
+            content: map['content'],
+            createdAt: DateTime.now().toUtc());
+        chatThread.messages.insert(0, message);
+        setState(() {});
+      }
     });
-
-    socket.connect();
-
-    socket.on('connect', (_) {
-      print('connected');
-      socket.emit('join', 0);
-    });
-
-    socket.on('newUser', (data) => print(data));
-
-    socket.on('receive_message', (data) {
-      String message = data.toString();
-      setState(() {
-        messages.insert(0, new Message(message, false));
-        _scrollController.animateTo(_scrollController.position.minScrollExtent,
-            duration: Duration(milliseconds: 600), curve: Curves.easeIn);
-      });
-    });
-    socket.on('disconnect', (_) => print('disconnect'));*/
     super.initState();
   }
 
@@ -76,7 +86,8 @@ class _ChatThreadState extends State<ChatThread> {
                 children: [
                   CircleAvatar(
                     radius: 25,
-                    backgroundColor: Colors.grey,
+                    backgroundImage:
+                        NetworkImage(getAvatar + widget.receiver.id.toString()),
                   ),
                   Container(
                     margin: EdgeInsets.only(left: 20),
@@ -85,13 +96,14 @@ class _ChatThreadState extends State<ChatThread> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Avatar Name',
+                          widget.receiver.username,
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w700),
                         ),
+                        /*
                         Text('Online Now',
                             style: TextStyle(
-                                fontSize: 10, fontWeight: FontWeight.w300)),
+                                fontSize: 10, fontWeight: FontWeight.w300)),*/
                       ],
                     ),
                   ),
@@ -120,7 +132,7 @@ class _ChatThreadState extends State<ChatThread> {
                 controller: _scrollController,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (BuildContext context, int index) {
-                  if (messages[index].senderType) {
+                  if (chatThread.messages[index].sender.id == widget.user.id) {
                     return Padding(
                         padding: EdgeInsets.only(
                             left: 30, right: 30, top: 7.5, bottom: 7.5),
@@ -136,18 +148,40 @@ class _ChatThreadState extends State<ChatThread> {
                                       borderRadius: BorderRadius.circular(10)),
                                   width: 270,
                                   padding: EdgeInsets.all(15),
-                                  child: Text(messages[index].text),
+                                  child:
+                                      Text(chatThread.messages[index].content),
                                 )
                               ],
                             ),
                             Container(
                               margin: EdgeInsets.all(6),
-                              child: Text(
-                                '3 minutes ago',
-                                style: TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w300),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    getDayDiff(
+                                        chatThread.messages[index].createdAt),
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w300),
+                                  ),
+                                  Text(
+                                    ' ',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w300),
+                                  ),
+                                  Text(
+                                    getTime(
+                                        chatThread.messages[index].createdAt),
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w300),
+                                  ),
+                                ],
                               ),
-                            )
+                            ),
                           ],
                         ));
                   } else {
@@ -165,7 +199,7 @@ class _ChatThreadState extends State<ChatThread> {
                                     borderRadius: BorderRadius.circular(10)),
                                 width: 270,
                                 padding: EdgeInsets.all(15),
-                                child: Text(messages[index].text,
+                                child: Text(chatThread.messages[index].content,
                                     style: TextStyle(color: Colors.white)),
                               ),
                               Spacer()
@@ -173,10 +207,30 @@ class _ChatThreadState extends State<ChatThread> {
                           ),
                           Container(
                             margin: EdgeInsets.all(6),
-                            child: Text(
-                              '3 minutes ago',
-                              style: TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w300),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  getDayDiff(
+                                      chatThread.messages[index].createdAt),
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w300),
+                                ),
+                                Text(
+                                  ' ',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w300),
+                                ),
+                                Text(
+                                  getTime(chatThread.messages[index].createdAt),
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w300),
+                                ),
+                              ],
                             ),
                           )
                         ],
@@ -184,7 +238,7 @@ class _ChatThreadState extends State<ChatThread> {
                     );
                   }
                 },
-                itemCount: messages.length,
+                itemCount: chatThread.messages.length,
               ),
             ),
             Container(
@@ -226,7 +280,32 @@ class _ChatThreadState extends State<ChatThread> {
                         socket.emit('send_message', message);*/
                         setState(() {
                           _textEditingController.clear();
-                          messages.insert(0, new Message(message, true));
+                          chatThread.messages.insert(
+                              0,
+                              new Message(
+                                  sender: widget.user,
+                                  receiver: widget.receiver,
+                                  content: message,
+                                  createdAt: DateTime.now().toUtc()));
+                          widget.socket.emit('send_message', {
+                            'sender': {
+                              '_id': widget.user.id,
+                              'username': widget.user.username
+                            },
+                            'receiver': {
+                              '_id': widget.receiver.id,
+                              'username': widget.receiver.username
+                            },
+                            'content': message,
+                            'threadID': chatThread.threadID,
+                            'createdAt': DateTime.now().toString()
+                          });
+                          ChatThreadController.storeMessage(
+                              widget.user.token,
+                              widget.user.id,
+                              widget.receiver.id,
+                              chatThread.threadID,
+                              message);
                           _scrollController.animateTo(
                               _scrollController.position.minScrollExtent,
                               duration: Duration(milliseconds: 600),
